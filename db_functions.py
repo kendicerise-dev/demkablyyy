@@ -116,6 +116,53 @@ def get_orders():
         return None
     finally:
         conn.close()
+def save_product(self):
+    import psycopg2
+    from config import DB_CONFIG
 
+    conn = psycopg2.connect(**DB_CONFIG)
+    try:
+        cursor = conn.cursor()
+
+        article = self.article.text()
+        name = self.name.text()
+        price = float(self.price.text() or 0)
+        discount = int(self.discount.text() or 0)
+        stock = int(self.stock.text() or 0)
+
+        if self.product:  # UPDATE
+            cursor.execute("""
+            UPDATE products
+            SET product_name=%s,
+                product_price=%s,
+                product_discount=%s,
+                product_stock_quantity=%s
+            WHERE product_article=%s
+            """, (name, price, discount, stock, article))
+
+        else:  # INSERT
+            cursor.execute("""
+            INSERT INTO products (
+                product_article,
+                product_name,
+                product_price,
+                product_discount,
+                product_stock_quantity,
+                supplier_id,
+                manufacturer_id,
+                unit_id,
+                category_id,
+                product_description
+            )
+            VALUES (%s,%s,%s,%s,%s,1,1,1,1,'-')
+            """, (article, name, price, discount, stock))
+
+        conn.commit()
+        self.window.close()
+
+    except Exception as e:
+        print("Ошибка:", e)
+    finally:
+        conn.close()
 
 

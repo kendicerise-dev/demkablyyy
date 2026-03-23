@@ -39,7 +39,8 @@ class MainWindow:
         self.orders_button.clicked.connect(self.orders_app)
 
         logo_path = os.path.join(os.path.dirname(__file__), "../resources/Icon.png")
-
+        self.create_product_button.clicked.connect(self.open_add_form)
+        self.edit_window_open = False
         self.logo.setPixmap(QPixmap(logo_path))
 
 # Переменная для корректного оторажения функционала взависимости от роли
@@ -89,6 +90,24 @@ class MainWindow:
         for s in sorted(suppliers):
             self.supplier_filter.addItem(s)
 
+    def open_add_form(self):
+        if self.edit_window_open:
+            return
+
+        from logic.product_form import ProductForm
+
+        self.form = ProductForm(parent=self)
+
+        self.edit_window_open = True
+        self.form.window.show()
+        self.form.window.destroyed.connect(self.on_form_close)
+
+    def on_form_close(self):
+        self.edit_window_open = False
+        from db_functions import fetch_products
+        self.all_products = fetch_products()
+        self.apply_filters()
+
     def apply_filters(self):
         products = self.all_products
         # поиск
@@ -128,6 +147,7 @@ class MainWindow:
     def display_product(self, products):
         for product in products:
             card = ItemProduct(product, self.role_name)
+            card.parent_window = self
             self.product_layout.addWidget(card.ui)
 
     def orders_app(self):
@@ -146,3 +166,4 @@ class MainWindow:
 
 
 
+я

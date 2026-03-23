@@ -50,6 +50,8 @@ class ItemProduct:
 
         old_price = float(product_data.get("old_price") or 0)
         new_price = float(product_data.get("new_price") or 0)
+        self.product_data = product_data
+        self.ui.mousePressEvent = self.open_edit
 
         # ---- отображение цены ----
         if discount > 0:
@@ -70,3 +72,17 @@ class ItemProduct:
             self.ui.setStyleSheet("background-color:#2E8B57;")
 
 
+    def open_edit(self, event):
+        if self.role_name != "Администратор":
+            return
+
+        if self.parent_window.edit_window_open:
+            return
+
+        from logic.product_form import ProductForm
+
+        self.form = ProductForm(self.product_data, parent=self.parent_window)
+
+        self.parent_window.edit_window_open = True
+        self.form.window.show()
+        self.form.window.destroyed.connect(self.parent_window.on_form_close)
